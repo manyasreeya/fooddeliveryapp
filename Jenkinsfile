@@ -18,14 +18,14 @@ pipeline {
         stage('2. Build') {
             steps {
                 echo 'Building Spring Boot application with Maven...'
-                bat 'mvn clean package -DskipTests'
+                bat 'mvnw.cmd clean package -DskipTests'
             }
         }
 
         stage('3. Test') {
             steps {
                 echo 'Running unit tests...'
-                bat 'mvn test'
+                bat 'mvnw.cmd test'
             }
             post {
                 always {
@@ -38,7 +38,7 @@ pipeline {
             steps {
                 echo 'Running SonarQube quality checks...'
                 withSonarQubeEnv(env.SONARQUBE_SERVER) {
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=fooddeliveryapp'
+                    bat 'mvnw.cmd sonar:sonar -Dsonar.projectKey=fooddeliveryapp'
                 }
             }
         }
