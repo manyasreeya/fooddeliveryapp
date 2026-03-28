@@ -18,14 +18,14 @@ pipeline {
         stage('2. Build') {
             steps {
                 echo 'Building Spring Boot application with Maven...'
-                sh 'mvn clean package -DskipTests'
+                bat 'mvn clean package -DskipTests'
             }
         }
 
         stage('3. Test') {
             steps {
                 echo 'Running unit tests...'
-                sh 'mvn test'
+                bat 'mvn test'
             }
             post {
                 always {
@@ -38,7 +38,7 @@ pipeline {
             steps {
                 echo 'Running SonarQube quality checks...'
                 withSonarQubeEnv(env.SONARQUBE_SERVER) {
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=fooddeliveryapp'
+                    bat 'mvn sonar:sonar -Dsonar.projectKey=fooddeliveryapp'
                 }
             }
         }
@@ -46,8 +46,8 @@ pipeline {
         stage('5. Docker Build') {
             steps {
                 echo 'Building Docker container...'
-                sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID} ."
-                sh "docker tag ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID} ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
+                bat "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID} ."
+                bat "docker tag ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID} ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
             }
         }
 
@@ -55,9 +55,9 @@ pipeline {
             steps {
                 echo 'Pushing Docker container to registry...'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}"
-                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
+                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+                    bat "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}"
+                    bat "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -66,9 +66,9 @@ pipeline {
             steps {
                 echo 'Deploying to AWS EC2 using Docker Compose...'
                 // Assuming Jenkins is running on the EC2 instance, or SSH is configured
-                sh 'docker-compose down'
-                sh 'docker-compose pull'
-                sh 'docker-compose up -d --build'
+                bat 'docker-compose down'
+                bat 'docker-compose pull'
+                bat 'docker-compose up -d --build'
             }
         }
     }
