@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart | Savor</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-solid">
+        <div class="nav-container container">
+            <a href="/" class="logo">
+                <i class="fa-solid fa-utensils"></i> Savor
+            </a>
+            <div class="nav-links">
+                <a th:href="@{/}">Home</a>
+                <a href="/#menu">Menu</a>
+                <a th:href="@{/cart}" class="cart-btn active">
+                    <i class="fa-solid fa-cart-shopping"></i> Cart
+                    <span class="cart-badge" th:if="${cartCount != null and cartCount > 0}" th:text="${cartCount}"></span>
+                </a>
+                <a th:if="${loggedInUser == null}" th:href="@{/login}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.95rem;">Sign In</a>
+                <div th:if="${loggedInUser != null}" style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-weight: 800; color: var(--primary);">Hi, <span th:text="${loggedInUser.name}">Name</span></span>
+                    <a th:href="@{/logout}" style="font-size: 0.9rem; color: var(--text-muted);"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CART SECTION -->
+    <section class="cart-section container">
+        <div class="cart-header">
+            <h2>Your Order 🛒</h2>
+            <p>Review your delicious selections before checking out.</p>
+        </div>
+
+        <div th:if="${#lists.isEmpty(cart)}" class="empty-state">
+            <div class="empty-cart-icon">
+                <i class="fa-solid fa-basket-shopping"></i>
+            </div>
+            <h3>Your cart feels a bit light!</h3>
+            <p>Looks like you haven't added any dishes yet.</p>
+            <a href="/#menu" class="btn btn-primary mt-4">Browse Menu</a>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(cart)}" class="cart-container">
+            <div class="cart-items">
+                <div class="cart-item" th:each="item : ${cart}">
+                    <div class="item-details">
+                        <div class="item-icon" style="overflow: hidden;">
+                            <img th:if="${not #strings.isEmpty(item.imageUrl)}" th:src="${item.imageUrl}" alt="icon" style="width:100%; height:100%; object-fit:cover;" />
+                            <i th:if="${#strings.isEmpty(item.imageUrl)}" class="fa-solid fa-bowl-food"></i>
+                        </div>
+                        <div>
+                            <h4 th:text="${item.itemName}">Item Name</h4>
+                            <p class="text-sm text-gray">Quantity: <span th:text="${item.quantity}">1</span></p>
+                        </div>
+                    </div>
+                    <div class="item-price">
+                        <span th:text="'₹' + ${item.price}">₹0.00</span>
+                    </div>
+                </div>
+                
+                <!-- Dynamic Total Calculation -->
+                <div class="cart-total-row">
+                    <h3>Total to pay</h3>
+                    <h3 class="total-amount highlight" th:text="'₹' + ${total}">₹0.00</h3>
+                </div>
+            </div>
+
+            <div class="cart-sidebar">
+                <div class="summary-card">
+                    <h3>Order Summary</h3>
+                    <div class="summary-row">
+                        <span>Items</span>
+                        <span th:text="${cartCount}">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Total Amount</span>
+                        <span th:text="'₹' + ${total}">₹0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Delivery Fee</span>
+                        <span>Free</span>
+                    </div>
+                    <hr>
+                    <form action="/place-order" method="post" class="mt-4">
+                        <div th:if="${loggedInUser != null}" style="margin-bottom: 15px; text-align: left; padding: 12px; background: rgba(46, 213, 115, 0.1); border-radius: 8px; border: 1px solid rgba(46, 213, 115, 0.3);">
+                            <p style="font-size: 0.85rem; color: var(--accent-dark); font-weight: 600; margin-bottom: 0;">
+                                <i class="fa-solid fa-circle-check"></i> Ordering securely as <span th:text="${loggedInUser.name}">Name</span>
+                            </p>
+                        </div>
+                        <div th:if="${loggedInUser == null}" style="margin-bottom: 15px; text-align: left; padding: 12px; background: rgba(255, 71, 87, 0.05); border-radius: 8px; border: 1px solid rgba(255, 71, 87, 0.1);">
+                            <p style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 0;">
+                                <i class="fa-solid fa-lock"></i> Please sign in to securely check out.
+                            </p>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Confirm & Proceed to Payment <i class="fa-solid fa-arrow-right"></i></button>
+                    </form>
+                    <p class="secure-checkout"><i class="fa-solid fa-shield-halved"></i> Secure Checkout</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

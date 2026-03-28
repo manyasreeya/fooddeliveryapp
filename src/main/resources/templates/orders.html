@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savor | Admin Orders Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-section { padding: 120px 0 80px; min-height: 80vh; }
+        .table-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+        .orders-table { width: 100%; border-collapse: collapse; }
+        .orders-table th, .orders-table td { padding: 18px 25px; text-align: left; }
+        .orders-table th { background: var(--light); color: var(--text-main); font-weight: 800; font-size: 1.05rem; }
+        .orders-table tr { border-bottom: 1px solid var(--light); transition: background 0.2s; }
+        .orders-table tr:last-child { border-bottom: none; }
+        .orders-table tr:hover { background: #fdfdfd; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; }
+        .status-paid { background: #e0f8e9; color: var(--accent-dark); }
+        .order-id { font-family: monospace; font-size: 0.95rem; color: var(--text-muted); }
+        .time-placed { color: var(--primary); font-weight: 600; font-size: 0.95rem; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-solid">
+        <div class="nav-container container">
+            <a href="/" class="logo">
+                <i class="fa-solid fa-utensils"></i> Savor Admin
+            </a>
+            <div class="nav-links">
+                <a th:href="@{/}">Storefront</a>
+                <a th:href="@{/admin/orders}" class="active">Orders Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ADMIN PANEL -->
+    <section class="admin-section container">
+        <div class="cart-header">
+            <h2><i class="fa-solid fa-clipboard-list"></i> Order Management</h2>
+            <p>Real-time view of customer orders and timestamps.</p>
+        </div>
+
+        <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+            <i class="fa-solid fa-box-open empty-icon"></i>
+            <h3>No Orders Yet</h3>
+            <p>When customers place orders, they will appear here instantly.</p>
+        </div>
+
+        <div class="table-card" th:unless="${#lists.isEmpty(orders)}">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID / Tracking</th>
+                        <th>Time Placed</th>
+                        <th>Customer</th>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Total (₹)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td>
+                            <div class="order-id" th:text="${order.trackingId}">ABC-123</div>
+                            <small class="text-muted" th:text="'DB ID: ' + ${order.id}">1</small>
+                        </td>
+                        <td>
+                            <div class="time-placed" th:if="${order.orderTime != null}" 
+                                 th:text="${#temporals.format(order.orderTime, 'dd-MMM-yyyy HH:mm:ss')}">
+                                01-Jan-2026 12:00:00
+                            </div>
+                            <div class="text-muted" th:unless="${order.orderTime != null}">No Timestamp</div>
+                        </td>
+                        <td th:text="${order.customerName}">John Doe</td>
+                        <td style="font-weight: 600; color: var(--dark);" th:text="${order.itemName}">Pizza</td>
+                        <td th:text="${order.quantity}">1</td>
+                        <td style="font-weight: 800;" th:text="${order.price * order.quantity}">399.0</td>
+                        <td>
+                            <span class="status-badge status-paid" th:text="${order.orderStatus}">PAID</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-content">
+            <p>&copy; 2026 Savor Delivery Admin.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

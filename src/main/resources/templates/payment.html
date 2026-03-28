@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment | Savor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .payment-container {
+            max-width: 500px;
+            margin: 120px auto 50px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .payment-header {
+            background: var(--dark);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .payment-header h2 { font-size: 1.8rem; margin-bottom: 5px; }
+        .payment-amount { font-size: 2.5rem; font-weight: 800; color: var(--accent); }
+        .payment-body { padding: 40px 30px; }
+        .payment-card-mockup {
+            background: linear-gradient(135deg, #FF4757, #FF7675);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+        .card-chip { width: 35px; height: 25px; background: rgba(255,255,255,0.8); border-radius: 4px; margin-bottom: 15px; }
+        .card-details { display: flex; justify-content: space-between; font-size: 0.9rem; letter-spacing: 2px;}
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;}
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-sans); }
+        .payment-loader { display: none; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-solid">
+        <div class="nav-container container">
+            <a href="/" class="logo">
+                <i class="fa-solid fa-utensils"></i> Savor Checkout
+            </a>
+            <div class="nav-links">
+                <a href="/cart" style="color: var(--text-muted);"><i class="fa-solid fa-arrow-left"></i> Back to Cart</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAYMENT SECTION -->
+    <div class="payment-container">
+        <div class="payment-header">
+            <h2>Total Due</h2>
+            <div class="payment-amount" th:text="'₹' + ${amount}">₹0.00</div>
+            <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 5px;">Order ID: <span th:text="${#strings.substring(orderId,0,8)}"></span>...</p>
+        </div>
+
+        <div class="payment-body">
+            <div class="payment-card-mockup">
+                <div class="card-chip"></div>
+                <div style="font-size: 1.2rem; margin-bottom: 10px; letter-spacing: 3px;">**** **** **** 4242</div>
+                <div class="card-details">
+                    <span th:text="${customerName}">CARDHOLDER</span>
+                    <span>12/28</span>
+                </div>
+            </div>
+
+            <form id="paymentForm" action="/process-payment" method="post">
+                <input type="hidden" name="orderId" th:value="${orderId}" />
+                <input type="hidden" name="customerName" th:value="${customerName}" />
+                
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" placeholder="**** **** **** ****" value="4242 4242 4242 4242" disabled>
+                </div>
+                
+                <div style="display: flex; gap: 20px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Expiry Date</label>
+                        <input type="text" placeholder="MM/YY" value="12/28" disabled>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>CVV</label>
+                        <input type="password" placeholder="***" value="123" disabled>
+                    </div>
+                </div>
+
+                <button type="button" onclick="simulatePayment()" class="btn btn-primary btn-block" style="padding: 15px; font-size: 1.1rem;">
+                    <i class="fa-solid fa-lock"></i> Pay Securely
+                </button>
+                
+                <div class="payment-loader" id="loader">
+                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--accent);"></i>
+                    <p style="margin-top: 10px; font-weight: 600;">Processing transaction...</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function simulatePayment() {
+            document.querySelector("button").style.display = 'none';
+            document.getElementById("loader").style.display = 'block';
+            
+            // Simulate 2 second network delay for realistic mock gateway
+            setTimeout(() => {
+                document.getElementById("paymentForm").submit();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
