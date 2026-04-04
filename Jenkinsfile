@@ -9,7 +9,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "food-delivery-app-app"
         DOCKER_REGISTRY = "manyasreeya" 
-        SONARQUBE_SERVER = "SonarQube-Server"
+        SONARQUBE_SERVER = "SonarQube"
     }
 
     stages {
