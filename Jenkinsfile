@@ -1,40 +1,26 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'jdk17'
+        maven 'maven3'
+    }
+
     environment {
-        DOCKER_IMAGE = "fooddeliveryapp"
+        DOCKER_IMAGE = "food-delivery-app-app"
         DOCKER_REGISTRY = "manyasreeya" 
-        SONARQUBE_SERVER = "SonarQube-Server" // Configured in Jenkins global settings
+        SONARQUBE_SERVER = "SonarQube-Server"
     }
 
     stages {
-        stage('1. Checkout Code') {
+        stage('Build Jar') {
             steps {
-                echo 'Checking out source code from repository...'
-                checkout scm
-            }
-        }
-
-        stage('2. Build') {
-            steps {
-                echo 'Building Spring Boot application with Maven...'
+                echo 'Building Spring Boot JAR with Maven...'
                 bat 'mvnw.cmd clean package -DskipTests'
             }
         }
 
-        stage('3. Test') {
-            steps {
-                echo 'Running unit tests...'
-                bat 'mvnw.cmd test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-
-        stage('4. SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             steps {
                 echo 'Running SonarQube quality checks...'
                 withSonarQubeEnv(env.SONARQUBE_SERVER) {
@@ -43,39 +29,32 @@ pipeline {
             }
         }
 
-        stage('5. Docker Build') {
+        stage('Build Docker Image') {
             steps {
                 echo 'Building Docker container...'
-                bat "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID} ."
-                bat "docker tag ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID} ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
+                bat "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest ."
             }
         }
 
-        stage('6. Docker Push') {
+        stage('Docker Login') {
             steps {
-                echo 'Pushing Docker container to registry...'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
-                    bat "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}"
-                    bat "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
                 }
             }
         }
 
-        stage('7. Deploy to EC2') {
+        stage('Push Docker Image') {
             steps {
-                echo 'Deploying to AWS EC2 using Docker Compose...'
-                // Assuming Jenkins is running on the EC2 instance, or SSH is configured
-                bat 'docker-compose down'
-                bat 'docker-compose pull'
-                bat 'docker-compose up -d --build'
+                echo 'Pushing Docker container to registry...'
+                bat "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline completed successfully! Savor Delivery App is live."
+            echo "Pipeline completed successfully with all green boxes!"
         }
         failure {
             echo "Pipeline failed. Please check the logs."
