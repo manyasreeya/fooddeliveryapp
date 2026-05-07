@@ -8,10 +8,10 @@ pipeline {
     stages {
 
         stage('Clone Source Code') {
-            steps {
-                git 'https://github.com/manyasreeya/fooddeliveryapp.git'
-            }
-        }
+    steps {
+        git branch: 'main', url: 'https://github.com/manyasreeya/fooddeliveryapp.git'
+    }
+}
 
         stage('Build Maven Project') {
             steps {
