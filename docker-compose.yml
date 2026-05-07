@@ -1,64 +1,15 @@
-version: '3.8'
-
 services:
-  app:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    container_name: savor-food-delivery-app
-    ports:
-      - "8081:8081"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/fooddb?useSSL=false&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    networks:
-      - food-network
-
-  mysql-db:
+  mysql:
     image: mysql:8.0
-    container_name: savor-mysql
-    restart: always
     environment:
-      - MYSQL_DATABASE=fooddb
-      - MYSQL_ROOT_PASSWORD=rootpassword
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: fooddb
     ports:
       - "3307:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - food-network
 
-  sonarqube:
-    image: sonarqube:9.9.4-community
-    container_name: savor-sonarqube
-    restart: unless-stopped
+  app:
+    image: fooddeliveryapp
     ports:
-      - "9000:9000"
-    environment:
-      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-    networks:
-      - food-network
-
-volumes:
-  db_data:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
-
-networks:
-  food-network:
-    driver: bridge
+      - "8082:8080"
+    depends_on:
+      - mysql
