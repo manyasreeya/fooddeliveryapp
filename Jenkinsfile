@@ -33,8 +33,8 @@ pipeline {
 
         stage('Deploy To Kubernetes') {
             steps {
-                bat 'kubectl apply -f src/main/resources/k8s/deployment.yaml'
-                bat 'kubectl apply -f src/main/resources/k8s/service.yaml'
+                bat 'kubectl apply --validate=false -f src/main/resources/k8s/deployment.yaml'
+                bat 'kubectl apply --validate=false -f src/main/resources/k8s/service.yaml'
             }
         }
 
