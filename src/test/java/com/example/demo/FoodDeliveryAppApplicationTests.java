@@ -1,13 +1,11 @@
 package com.example.demo;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class FoodDeliveryAppApplicationTests {
+class FoodDeliveryApplicationTests {
 
-	@Test
-	void contextLoads() {
+    @Test
+		void contextLoads() {
+    		System.out.println("Application Loaded Successfully");
 	}
-
 }

@@ -18,6 +18,11 @@ pipeline {
                 bat '.\\mvnw.cmd clean package -DskipTests'
             }
         }
+        stage('Build and Test') {
+            steps {
+                bat '.\\mvnw.cmd clean test'
+            }
+        }
 
         stage('Build Docker Image') {   
             steps {

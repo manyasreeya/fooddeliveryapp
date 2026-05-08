@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -15,6 +16,7 @@
     <groupId>com.example</groupId>
     <artifactId>food-delivery-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <name>food-delivery-app</name>
     <description>Food Delivery App</description>
 
@@ -24,13 +26,13 @@
 
     <dependencies>
 
-        <!-- Web -->
+        <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JPA -->
+        <!-- Spring Boot JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -43,7 +45,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Thymeleaf (VERY IMPORTANT) -->
+        <!-- Thymeleaf -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -64,7 +66,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Test -->
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -74,40 +76,56 @@
     </dependencies>
 
     <build>
+
         <plugins>
+
+            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            
-            <!-- SonarQube Maven Plugin -->
+
+            <!-- SonarQube Plugin -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>3.10.0.2594</version>
             </plugin>
-            
-            <!-- JaCoCo Code Coverage Analytics -->
+
+            <!-- JaCoCo Plugin -->
             <plugin>
+
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.11</version>
+                <version>0.8.12</version>
+
                 <executions>
+
                     <execution>
+
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+
                     </execution>
+
                     <execution>
+
                         <id>report</id>
-                        <phase>prepare-package</phase>
+                        <phase>test</phase>
+
                         <goals>
                             <goal>report</goal>
                         </goals>
+
                     </execution>
+
                 </executions>
+
             </plugin>
+
         </plugins>
+
     </build>
 
 </project>
