@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent 
 
     environment {
         IMAGE_NAME = "manyasreeya/fooddelivery1:v1"
