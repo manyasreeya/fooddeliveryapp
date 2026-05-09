@@ -1,16 +1,16 @@
-package com.example.demo.service;
+package com.example.controller;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FoodServiceTest {
+public class HomeControllerTest {
 
     @Test
-    void testAddition() {
+    void testHomePage() {
 
-        int expected = 10;
-        int actual = 5 + 5;
+        String expected = "home";
+        String actual = "home";
 
         assertEquals(expected, actual);
     }
