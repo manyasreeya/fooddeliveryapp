@@ -110,11 +110,16 @@ pipeline {
         }
 
         stage('Deploy To AWS EC2') {
-
     steps {
-
         bat """
-        ssh -i C:\\keys\\fooddelivery-key.pem -o StrictHostKeyChecking=no ec2-user@98.81.194.160 "sudo systemctl start docker; sudo docker rm -f foodapp || true; sudo docker pull manyasreeya/fooddelivery1:v3; sudo docker run -d --name foodapp -p 8080:8080 manyasreeya/fooddelivery1:v3"
+        ssh -i C:\\keys\\fooddelivery-key.pem -o StrictHostKeyChecking=no ec2-user@98.81.194.160 ^
+        "sudo systemctl start docker; ^
+        sudo docker stop foodapp 2>/dev/null || true; ^
+        sudo docker rm -f foodapp 2>/dev/null || true; ^
+        sudo docker ps -q --filter publish=8080 | xargs -r sudo docker stop; ^
+        sudo docker ps -aq --filter publish=8080 | xargs -r sudo docker rm -f; ^
+        sudo docker pull manyasreeya/fooddelivery1:v3; ^
+        sudo docker run -d --name foodapp -p 8080:8080 --restart always manyasreeya/fooddelivery1:v3"
         """
     }
 }
