@@ -1,4 +1,6 @@
 HELP.md
+
+### Maven ###
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -31,3 +33,17 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Terraform ###
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform.tfvars
+
+### Logs ###
+*.log
+
+### OS Files ###
+.DS_Store
+Thumbs.db
