@@ -49,6 +49,22 @@ pipeline {
                 bat 'kubectl get pods'
             }
         }
+        stage('Deploy To AWS EC2') {
+
+        steps {
+
+            sshagent(['aws-ec2-key']) {
+
+            bat '''
+            ssh -o StrictHostKeyChecking=no ec2-user@98.81.194.160 "
+            sudo docker rm -f foodapp || true &&
+            sudo docker pull manyasreeya/fooddelivery1:v2 &&
+            sudo docker run -d --name foodapp -p 8080:8080 manyasreeya/fooddelivery1:v2
+            "
+            '''
+        }
+    }
+}
     }
 
     post {
