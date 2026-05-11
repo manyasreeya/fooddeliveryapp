@@ -35,7 +35,7 @@ pipeline {
 
             steps {
 
-                bat '.\\mvnw.cmd package -DskipTests'
+                bat '.\\mvnw.cmd clean verify'
             }
         }
 
@@ -138,6 +138,33 @@ pipeline {
             }
         }
 
+        stage('Verify Email Notification') {
+
+            steps {
+
+                emailext(
+                    subject: "Fusion Cloud Email Verification",
+                    body: """
+Fusion Cloud Email Notification Test Successful.
+
+Pipeline Build Number: ${BUILD_NUMBER}
+
+This verifies:
+- Jenkins SMTP configuration
+- Gmail authentication
+- Enterprise alert delivery
+- AI monitoring notification flow
+
+Regards,
+Fusion Cloud DevOps Platform
+                    """,
+                    to: 'manyarajpilli23@gmail.com'
+                )
+
+                echo 'Email notification verification completed successfully'
+            }
+        }
+
         stage('Send Deployment Event To Datadog') {
 
             steps {
@@ -172,6 +199,7 @@ Completed Stages:
 - Kubernetes Deployment Success
 - Datadog Monitoring Verified
 - AI Monitoring Analysis Completed
+- Email Notification Verified
 
 Monitoring:
 Datadog observability is active.
