@@ -1,19 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: fooddelivery-deployment
+
 spec:
   replicas: 2
+
   selector:
     matchLabels:
       app: fooddelivery
+
   template:
     metadata:
       labels:
         app: fooddelivery
+
     spec:
       containers:
       - name: fooddelivery-container
-        image: manyasreeya/fooddelivery1:v1
+        image: manyasreeya/fooddelivery1:v3
+
         ports:
         - containerPort: 8080
