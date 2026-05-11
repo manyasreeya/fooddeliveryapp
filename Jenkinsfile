@@ -2,11 +2,7 @@ pipeline {
 
     agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK17'
-    }
-
+    
     environment {
 
         IMAGE_NAME = "manyasreeya/fooddelivery1"
