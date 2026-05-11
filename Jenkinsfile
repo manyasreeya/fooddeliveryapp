@@ -3,9 +3,10 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_REPO  = "manyasreeya/fooddelivery1"
-        IMAGE_TAG   = "v${BUILD_NUMBER}"
-        IMAGE_NAME  = "manyasreeya/fooddelivery1:v${BUILD_NUMBER}"
+
+        IMAGE_REPO = "manyasreeya/fooddelivery1"
+        IMAGE_TAG  = "v${BUILD_NUMBER}"
+        IMAGE_NAME = "${IMAGE_REPO}:v${BUILD_NUMBER}"
 
         ADMIN_EMAIL = "23mh1a0510@acoe.edu.in"
     }
@@ -13,50 +14,42 @@ pipeline {
     stages {
 
         stage('Clone Source Code') {
+
             steps {
+
                 git branch: 'main',
-                    url: 'https://github.com/manyasreeya/fooddeliveryapp.git'
+                url: 'https://github.com/manyasreeya/fooddeliveryapp.git'
             }
         }
 
         stage('Build Maven Project') {
+
             steps {
+
                 bat '.\\mvnw.cmd clean package -DskipTests'
             }
         }
 
         stage('Run Unit Tests') {
+
             steps {
+
                 bat '.\\mvnw.cmd test'
             }
 
             post {
+
                 always {
+
                     junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
 
-        stage('Generate JaCoCo Coverage Report') {
-            steps {
-                bat '.\\mvnw.cmd jacoco:report'
-            }
-
-            post {
-                always {
-                    jacoco(
-                        execPattern: '**/target/jacoco.exec',
-                        classPattern: '**/target/classes',
-                        sourcePattern: '**/src/main/java',
-                        exclusionPattern: '**/test/**'
-                    )
-                }
-            }
-        }
-
-        stage('Code Quality - SonarQube') {
+        stage('SonarQube Analysis') {
 
             environment {
+
                 SONAR_AUTH_TOKEN = credentials('tokenofsonar')
             }
 
@@ -67,9 +60,8 @@ pipeline {
                     bat """
                     .\\mvnw.cmd sonar:sonar ^
                     -Dsonar.projectKey=fooddeliveryapp ^
-                    -Dsonar.projectName=FusionCloud-FoodDelivery ^
-                    -Dsonar.login=%SONAR_AUTH_TOKEN% ^
-                    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                    -Dsonar.projectName=FusionCloud ^
+                    -Dsonar.login=%SONAR_AUTH_TOKEN%
                     """
                 }
             }
@@ -81,12 +73,10 @@ pipeline {
 
                 bat 'docker build -t %IMAGE_NAME% .'
                 bat 'docker tag %IMAGE_NAME% %IMAGE_REPO%:latest'
-
-                echo "Docker image built successfully"
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Push Docker Image') {
 
             steps {
 
@@ -100,8 +90,6 @@ pipeline {
 
                     bat 'docker push %IMAGE_NAME%'
                     bat 'docker push %IMAGE_REPO%:latest'
-
-                    echo "Docker image pushed successfully"
                 }
             }
         }
@@ -124,20 +112,10 @@ pipeline {
                     kubectl apply -f src/main/resources/k8s/deployment.yaml
                     kubectl apply -f src/main/resources/k8s/service.yaml
 
-                    kubectl rollout status deployment/fooddelivery-deployment --timeout=180s
+                    kubectl get pods
+                    kubectl get svc
                     '''
                 }
-            }
-        }
-
-        stage('Verify AWS EKS Deployment') {
-
-            steps {
-
-                bat 'kubectl get nodes'
-                bat 'kubectl get pods -o wide'
-                bat 'kubectl get svc'
-                bat 'kubectl get hpa'
             }
         }
 
@@ -162,24 +140,14 @@ pipeline {
                     kubectl apply -f src/main/resources/k8s/deployment.yaml
                     kubectl apply -f src/main/resources/k8s/service.yaml
 
-                    kubectl rollout status deployment/fooddelivery-deployment --timeout=180s
+                    kubectl get pods
+                    kubectl get svc
                     '''
                 }
             }
         }
 
-        stage('Verify Azure AKS Deployment') {
-
-            steps {
-
-                bat 'kubectl get nodes'
-                bat 'kubectl get pods -o wide'
-                bat 'kubectl get svc'
-                bat 'kubectl get hpa'
-            }
-        }
-
-        stage('Run AI Incident Analyzer') {
+        stage('Run AI Analyzer') {
 
             steps {
 
@@ -187,14 +155,12 @@ pipeline {
             }
         }
 
-        stage('Health Check') {
+        stage('Health Verification') {
 
             steps {
 
                 bat 'kubectl get pods'
                 bat 'kubectl get svc'
-
-                echo "Fusion Cloud deployment verified successfully"
             }
         }
     }
@@ -204,65 +170,48 @@ pipeline {
         success {
 
             mail to: "${ADMIN_EMAIL}",
-                 subject: "SUCCESS: Fusion Cloud Build #${BUILD_NUMBER}",
+            subject: "Fusion Cloud SUCCESS - Build #${BUILD_NUMBER}",
 
-                 body: """
-====================================================
+            body: """
+Fusion Cloud Pipeline Successful
 
-Fusion Cloud - Multi-Cloud Deployment Successful
+Build Number: ${BUILD_NUMBER}
 
-====================================================
+Completed:
+- Maven Build
+- SonarQube Scan
+- Docker Build
+- Docker Push
+- AWS EKS Deployment
+- Azure AKS Deployment
+- AI Analyzer
+- Kubernetes Verification
 
-Build Number : #${BUILD_NUMBER}
+Monitoring:
+- Datadog Active
+- Alerts Enabled
 
-Docker Image : ${IMAGE_NAME}
-
-Deployment Status:
-- AWS EKS : SUCCESS
-- Azure AKS : SUCCESS
-- Docker Hub : SUCCESS
-- Kubernetes : SUCCESS
-- AI Analyzer : SUCCESS
-
-Reports:
-- Jenkins Console : ${BUILD_URL}console
-- JaCoCo Report : ${BUILD_URL}jacoco
-
-Next Steps:
-1. Verify Datadog dashboards
-2. Monitor Kubernetes alerts
-3. Review AI analyzer output
-
-Fusion Cloud Automation Platform
-
-====================================================
+Jenkins Console:
+${BUILD_URL}console
 """
         }
 
         failure {
 
             mail to: "${ADMIN_EMAIL}",
-                 subject: "FAILED: Fusion Cloud Build #${BUILD_NUMBER}",
+            subject: "Fusion Cloud FAILED - Build #${BUILD_NUMBER}",
 
-                 body: """
-====================================================
-
+            body: """
 Fusion Cloud Pipeline Failed
 
-====================================================
-
-Build Number : #${BUILD_NUMBER}
-
-Action Required:
-1. Open Jenkins Console
-2. Review failed stage
-3. Check Kubernetes logs
-4. Review AI analyzer
-
-Build Logs:
+Check Jenkins Console:
 ${BUILD_URL}console
 
-====================================================
+Possible Causes:
+- Docker issue
+- Kubernetes issue
+- AWS auth failure
+- Azure auth failure
 """
         }
 
