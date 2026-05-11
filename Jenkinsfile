@@ -108,7 +108,7 @@ pipeline {
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Verify Kubernetes Deployment') {
 
             steps {
 
@@ -120,7 +120,7 @@ pipeline {
             }
         }
 
-        stage('Datadog Monitoring Validation') {
+        stage('Verify Datadog Monitoring') {
 
             steps {
 
@@ -130,7 +130,7 @@ pipeline {
             }
         }
 
-        stage('AI Log Analysis') {
+        stage('AI Monitoring Analysis') {
 
             steps {
 
@@ -146,7 +146,7 @@ pipeline {
                 curl -X POST "https://api.datadoghq.com/api/v1/events" ^
                 -H "DD-API-KEY: %DATADOG_API_KEY%" ^
                 -H "Content-Type: application/json" ^
-                -d "{\\"title\\":\\"Fusion Cloud Deployment Success\\",\\"text\\":\\"Build ${BUILD_NUMBER} deployed successfully to Kubernetes\\"}"
+                -d "{\\"title\\":\\"Fusion Cloud Deployment Success\\",\\"text\\":\\"Build ${BUILD_NUMBER} deployed successfully to Kubernetes with AI monitoring enabled\\"}"
                 """
             }
         }
@@ -159,25 +159,27 @@ pipeline {
             emailext(
                 subject: "Fusion Cloud Pipeline Success",
                 body: """
-                Fusion Cloud CI/CD Pipeline Completed Successfully.
+Fusion Cloud CI/CD Pipeline Completed Successfully.
 
-                Build Number: ${BUILD_NUMBER}
+Build Number: ${BUILD_NUMBER}
 
-                Completed Stages:
-                - Build Success
-                - Test Success
-                - SonarQube Analysis Passed
-                - Docker Image Build Success
-                - Docker Push Success
-                - Kubernetes Deployment Success
-                - Datadog Monitoring Verified
-                - AI Analysis Completed
+Completed Stages:
+- Build Success
+- Test Success
+- SonarQube Analysis Passed
+- Docker Image Build Success
+- Docker Push Success
+- Kubernetes Deployment Success
+- Datadog Monitoring Verified
+- AI Monitoring Analysis Completed
 
-                Monitoring:
-                Datadog observability is active.
+Monitoring:
+Datadog observability is active.
 
-                Regards,
-                Fusion Cloud DevOps Platform
+Application deployed successfully on Kubernetes.
+
+Regards,
+Fusion Cloud DevOps Platform
                 """,
                 to: 'manyarajpilli23@gmail.com'
             )
@@ -187,33 +189,37 @@ pipeline {
 
         failure {
 
-            bat 'python ai-monitor/log_analyzer.py'
+            script {
+
+                bat 'python ai-monitor/log_analyzer.py'
+            }
 
             emailext(
                 subject: "Fusion Cloud Pipeline Failed",
                 body: """
-                Fusion Cloud Pipeline Failed.
+Fusion Cloud Pipeline Failed.
 
-                Build Number: ${BUILD_NUMBER}
+Build Number: ${BUILD_NUMBER}
 
-                AI Monitoring detected deployment/runtime failure.
+AI Monitoring detected deployment/runtime failure.
 
-                Possible Causes:
-                - Kubernetes deployment issue
-                - Docker image issue
-                - Pod crash
-                - Resource issue
+Possible Causes:
+- Kubernetes deployment issue
+- Docker image issue
+- Pod crash
+- Resource issue
+- Cluster issue
 
-                Recommended Actions:
-                1. Check Jenkins logs
-                2. Check Kubernetes pod logs
-                3. Check Datadog dashboards
-                4. Review AI analyzer report
+Recommended Actions:
+1. Check Jenkins logs
+2. Check Kubernetes pod logs
+3. Check Datadog dashboards
+4. Review AI analyzer report
 
-                Datadog monitoring has captured deployment metrics and alerts.
+Datadog monitoring has captured deployment metrics and alerts.
 
-                Regards,
-                Fusion Cloud AI Monitoring System
+Regards,
+Fusion Cloud AI Monitoring System
                 """,
                 to: 'manyarajpilli23@gmail.com'
             )
