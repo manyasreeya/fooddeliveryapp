@@ -2,16 +2,12 @@ pipeline {
 
     agent any
 
-    
     environment {
 
         IMAGE_NAME = "manyasreeya/fooddelivery1"
-        IMAGE_TAG = "v${BUILD_NUMBER}"
+        IMAGE_TAG  = "v${BUILD_NUMBER}"
 
         SONAR_TOKEN = credentials('tokenofsonar')
-
-        DOCKER_USER = credentials('docker-user')
-        DOCKER_PASS = credentials('docker-pass')
     }
 
     stages {
@@ -29,7 +25,7 @@ pipeline {
 
             steps {
 
-                bat 'mvn clean'
+                bat '.\\mvnw.cmd clean'
             }
         }
 
@@ -37,7 +33,7 @@ pipeline {
 
             steps {
 
-                bat 'mvn package -DskipTests'
+                bat '.\\mvnw.cmd package -DskipTests'
             }
         }
 
@@ -45,7 +41,7 @@ pipeline {
 
             steps {
 
-                bat 'mvn test'
+                bat '.\\mvnw.cmd test'
             }
         }
 
@@ -56,7 +52,7 @@ pipeline {
                 withSonarQubeEnv('sonarqube') {
 
                     bat """
-                    mvn sonar:sonar ^
+                    .\\mvnw.cmd sonar:sonar ^
                     -Dsonar.projectKey=fooddeliveryapp ^
                     -Dsonar.projectName=FusionCloud ^
                     -Dsonar.login=%SONAR_TOKEN%
@@ -79,7 +75,14 @@ pipeline {
 
             steps {
 
-                bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockercred1',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                }
             }
         }
 
@@ -97,9 +100,9 @@ pipeline {
 
             steps {
 
-                bat 'kubectl apply -f k8s/deployment.yaml'
+                bat 'kubectl apply -f src/main/resources/k8s/deployment.yaml'
 
-                bat 'kubectl apply -f k8s/service.yaml'
+                bat 'kubectl apply -f src/main/resources/k8s/service.yaml'
             }
         }
 
@@ -124,11 +127,6 @@ pipeline {
         failure {
 
             echo 'Fusion Cloud Pipeline Failed'
-        }
-
-        always {
-
-            cleanWs()
         }
     }
 }
