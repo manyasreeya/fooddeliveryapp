@@ -57,6 +57,7 @@ pipeline {
                     .\\mvnw.cmd sonar:sonar ^
                     -Dsonar.projectKey=fooddeliveryapp ^
                     -Dsonar.projectName=FusionCloud ^
+                    -Dsonar.host.url=http://3.85.207.201:9000 ^
                     -Dsonar.login=%SONAR_TOKEN%
                     """
                 }
@@ -138,33 +139,6 @@ pipeline {
             }
         }
 
-        stage('Verify Email Notification') {
-
-            steps {
-
-                emailext(
-                    subject: "Fusion Cloud Email Verification",
-                    body: """
-Fusion Cloud Email Notification Test Successful.
-
-Pipeline Build Number: ${BUILD_NUMBER}
-
-This verifies:
-- Jenkins SMTP configuration
-- Gmail authentication
-- Enterprise alert delivery
-- AI monitoring notification flow
-
-Regards,
-Fusion Cloud DevOps Platform
-                    """,
-                    to: 'manyarajpilli23@gmail.com'
-                )
-
-                echo 'Email notification verification completed successfully'
-            }
-        }
-
         stage('Send Deployment Event To Datadog') {
 
             steps {
@@ -181,12 +155,18 @@ Fusion Cloud DevOps Platform
 
     post {
 
+        always {
+
+            echo 'Pipeline execution completed'
+        }
+
         success {
 
-            emailext(
-                subject: "Fusion Cloud Pipeline Success",
+            mail(
+                to: 'tejaswipolanati@gmail.com',
+                subject: "Fusion Cloud Pipeline Success - Build ${BUILD_NUMBER}",
                 body: """
-Fusion Cloud CI/CD Pipeline Completed Successfully.
+Fusion Cloud CI/CD Pipeline Completed Successfully
 
 Build Number: ${BUILD_NUMBER}
 
@@ -199,20 +179,15 @@ Completed Stages:
 - Kubernetes Deployment Success
 - Datadog Monitoring Verified
 - AI Monitoring Analysis Completed
-- Email Notification Verified
-
-Monitoring:
-Datadog observability is active.
 
 Application deployed successfully on Kubernetes.
 
 Regards,
 Fusion Cloud DevOps Platform
-                """,
-                to: 'manyarajpilli23@gmail.com'
+"""
             )
 
-            echo 'Fusion Cloud Pipeline Success'
+            echo 'Fusion Cloud Success Email Sent'
         }
 
         failure {
@@ -222,14 +197,13 @@ Fusion Cloud DevOps Platform
                 bat 'python ai-monitor/log_analyzer.py'
             }
 
-            emailext(
-                subject: "Fusion Cloud Pipeline Failed",
+            mail(
+                to: 'tejaswipolanati@gmail.com',
+                subject: "Fusion Cloud Pipeline Failed - Build ${BUILD_NUMBER}",
                 body: """
-Fusion Cloud Pipeline Failed.
+Fusion Cloud Pipeline Failed
 
 Build Number: ${BUILD_NUMBER}
-
-AI Monitoring detected deployment/runtime failure.
 
 Possible Causes:
 - Kubernetes deployment issue
@@ -237,6 +211,7 @@ Possible Causes:
 - Pod crash
 - Resource issue
 - Cluster issue
+- SonarQube connectivity issue
 
 Recommended Actions:
 1. Check Jenkins logs
@@ -244,15 +219,12 @@ Recommended Actions:
 3. Check Datadog dashboards
 4. Review AI analyzer report
 
-Datadog monitoring has captured deployment metrics and alerts.
-
 Regards,
 Fusion Cloud AI Monitoring System
-                """,
-                to: 'manyarajpilli23@gmail.com'
+"""
             )
 
-            echo 'Fusion Cloud Pipeline Failed'
+            echo 'Fusion Cloud Failure Email Sent'
         }
     }
 }
