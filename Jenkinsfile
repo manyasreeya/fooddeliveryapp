@@ -163,7 +163,7 @@ pipeline {
         success {
 
             mail(
-                to: 'tejaswipolanati@gmail.com',
+                to: 'manyarajpilli23@gmail.com',
                 subject: "Fusion Cloud Pipeline Success - Build ${BUILD_NUMBER}",
                 body: """
 Fusion Cloud CI/CD Pipeline Completed Successfully
@@ -198,7 +198,7 @@ Fusion Cloud DevOps Platform
             }
 
             mail(
-                to: 'tejaswipolanati@gmail.com',
+                to: 'manyarajpilli23@gmail.com',
                 subject: "Fusion Cloud Pipeline Failed - Build ${BUILD_NUMBER}",
                 body: """
 Fusion Cloud Pipeline Failed
